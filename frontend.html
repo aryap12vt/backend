@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Live Translator</title>
+    <!-- Google Fonts for Roboto Slab -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Courier New", Courier;
+            background: linear-gradient(135deg, #00bfa5, #ae1054);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        /* Flex container for video and terminal */
+        .container {
+            display: flex;
+            width: 90%;
+            height: 150vh;
+            max-width: 1200px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Left side for the video */
+        .video-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        video {
+            width: 100%;
+            max-width: 600px;
+            border: 5px solid white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        video:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Right side for the terminal and GIF */
+        .terminal-container {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            margin-left: 50px;
+        }
+
+        .terminal {
+            background-color: #2e2e2e;
+            color: #39ff14;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            width: 50%; /* Adjust width as needed */
+            height: 90%;
+        }
+
+        .terminal-output {
+            width: 100%;
+            max-height: 100%;
+            white-space: pre-wrap;
+        }
+
+        .terminal::before {
+            content: 'Translation: ';
+            color: #ffcc00;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* GIF styling */
+        .gif-container {
+            width: 20%; /* Adjust width as needed */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 50px;
+        }
+
+        .gif-container img {
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* More emojis */
+        .emoji {
+            position: absolute;
+            font-size: 2.5rem;
+            animation: floatEmoji 8s infinite ease-in-out;
+            opacity: 0;
+        }
+
+        /* More emojis with random positions and durations */
+        .emoji:nth-child(1) { left: 5%; animation-duration: 10s; }
+        .emoji:nth-child(2) { left: 20%; animation-duration: 7s; }
+        .emoji:nth-child(3) { left: 35%; animation-duration: 11s; }
+        .emoji:nth-child(4) { left: 50%; animation-duration: 9s; }
+        .emoji:nth-child(5) { left: 65%; animation-duration: 8s; }
+        .emoji:nth-child(6) { left: 80%; animation-duration: 12s; }
+        .emoji:nth-child(7) { left: 95%; animation-duration: 9s; }
+
+        /* Animation for background emojis */
+        @keyframes floatEmoji {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Animation for title */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Floating emojis in the background -->
+    <div class="emoji">🤙🏼</div>
+    <div class="emoji">☝🏿</div>
+    <div class="emoji">✌</div>
+    <div class="emoji">✊🏽</div>
+    <div class="emoji">🫰🏿</div>
+    <div class="emoji">🤘🏾</div>
+    <div class="emoji">👍🏼</div>
+    <div class="emoji">👌</div>
+
+
+    <!-- Title at the top -->
+    <h1>Live Camera with Python Terminal</h1>
+
+    <div class="container">
+        <!-- Left side for the video -->
+        <div class="video-container">
+            <video id="video" autoplay playsinline></video>
+        </div>
+
+        <!-- Right side for the terminal and GIF -->
+        <div class="terminal-container">
+            <div class="terminal">
+                <div class="terminal-output" id="terminalOutput"></div>
+            </div>
+            <div class="gif-container">
+                <img src="https://media1.tenor.com/m/gXodU47Xb70AAAAC/sign-language-alphabet.gif" alt="Sign Language Alphabet">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Access the user's camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+            })
+            .catch((error) => {
+                console.error("Error accessing camera: ", error);
+            });
+
+        // Simulating Python output for demonstration
+        function simulatePythonOutput() {
+            const terminalOutput = document.getElementById('terminalOutput');
+            let i = 1;
+            setInterval(() => {
+                terminalOutput.textContent += '';
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            }, 2000);
+        }
+
+        // Start simulating output when the page loads
+        window.onload = simulatePythonOutput;
+    </script>
+</body>
+</html>
